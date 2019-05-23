@@ -45,7 +45,7 @@ public class CarInventory {
 		m.put("brand", brands[RandomUtils.nextInt(brands.length)]);
 		m.put("state", states[RandomUtils.nextInt(states.length)]);
 		try ( Jedis jedis =  pool.getResource() ) {
-			jedis.hset(generateVin(), m);
+			jedis.hmset(generateVin(), m);
 		}
 	}
 	
