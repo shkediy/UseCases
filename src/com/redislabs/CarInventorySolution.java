@@ -10,7 +10,7 @@ import org.apache.commons.lang.math.RandomUtils;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
-public class CarInventory {
+public class CarInventorySolution {
 	private JedisPool pool;
 	int currentYear = Calendar.getInstance().get(Calendar.YEAR);
 	
@@ -33,7 +33,7 @@ public class CarInventory {
 			"Rover","Saab","Smart","Subaru","Toyota","Volkswagen","Volvo"
 	};
 	
-	public CarInventory(String host, int port) {
+	public CarInventorySolution(String host, int port) {
 		pool = new JedisPool(host, port);
 	}
 	
@@ -44,8 +44,14 @@ public class CarInventory {
 		m.put("brand", brands[RandomUtils.nextInt(brands.length)]);
 		m.put("state", states[RandomUtils.nextInt(states.length)]);
 		String vin = generateVin();
-		try ( Jedis jedis =  pool.getResource() ) {
+		try ( Jedis jedis =  pool.getResource() ) {	
 			jedis.hmset(vin, m);
+			jedis.sadd("cars:all", vin);
+			jedis.sadd("cars:brand:" + m.get("brand"), vin);
+			jedis.sadd("cars:state:" + m.get("state"), vin);
+			jedis.sadd("cars:year:" + m.get("year"), vin);
+			jedis.zadd("cars:years", Integer.parseInt(m.get("year")), "cars:year:" + m.get("year"));
+			jedis.zincrby("cars:brands", 1, m.get("brand"));
 		}
 	}
 	
@@ -65,35 +71,53 @@ public class CarInventory {
 	
 	public long getNumberOfCars()
 	{
-		//TODO: Add missing code
-		return 0;
+		try ( Jedis jedis =  pool.getResource() ) {
+			return jedis.scard("cars:all");
+		}
 	}
 	
 	public Set<String> getVinsForYear(int year)
 	{
-		//TODO: Add missing code
-		return null;
+		try ( Jedis jedis =  pool.getResource() ) {
+			return jedis.smembers("cars:year:" + year);
+		}
 	}
 	
 	public Set<String> getVinsForYearRange(int startYear, int endYear)
 	{
-		//TODO: Add missing code
-		return null;
+		try ( Jedis jedis =  pool.getResource() ) {
+			Set<String> years = jedis.zrangeByScore("cars:years", startYear, endYear);
+			Set<String> vins = null;
+			boolean first = true;
+			for ( String year: years ) {
+				if ( first ) {
+					vins = jedis.smembers(year);
+					first = false;
+				}
+				else {
+				    vins.addAll(jedis.smembers(year));	
+				}	
+			}
+			
+			return vins;
+		}
 	}
 	
 	public Set<String> getVinsForBrandAndState(String brand, String state) {
-		//TODO: Add missing code
-		return null;
+		try ( Jedis jedis =  pool.getResource() ) {
+			return jedis.sinter("cars:brand:" + brand, "cars:state:" + state);
+		}
 	}
 	
 	public Set<String> getTopBrands(int num)
 	{
-		//TODO: Add missing code
-		return null;
+		try ( Jedis jedis =  pool.getResource() ) {
+			return jedis.zrevrange("cars:brands", 0, num - 1);
+		}
 	}
 	
 	public static void main(String[] args) {
-		CarInventory test = new CarInventory(args[0], Integer.parseInt(args[1]));
+		CarInventorySolution test = new CarInventorySolution(args[0], Integer.parseInt(args[1]));
 		for ( int i = 0; i < 1000; i++ )
 		{
 			test.addCar();
@@ -101,7 +125,7 @@ public class CarInventory {
 		
 		System.out.println("Total cars: " + test.getNumberOfCars());
 		System.out.println("Cars of 2013: " + test.getVinsForYear(2013));
-		System.out.println("Cars before 1990: " + test.getVinsForYearRange(0, 1990));
+		System.out.println("Cars before 1995: " + test.getVinsForYearRange(0, 1995));
 		System.out.println("Cars between 2017 and 2019: " + test.getVinsForYearRange(2017, 2019));
 		System.out.println("Ford cars in Arizona: " + test.getVinsForBrandAndState("Ford", "AZ"));
 		System.out.println("Top 5 brands: " + test.getTopBrands(5));
