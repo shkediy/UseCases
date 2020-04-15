@@ -90,17 +90,17 @@ public class RedisBitmaps {
 	
 	public static void main(String[] args) {
 		RedisBitmaps bm = new RedisBitmaps("localhost", 6379);
-		Scanner scan = new Scanner(System.in);
-		while ( true )
-		{
-			System.out.print("Enter device id:");
-			if ( !scan.hasNextLong() )
-				break;
-			long id = scan.nextLong();
-			System.out.println("Device " + id + " is" + ((bm.isDeviceSet(id)) ? "" : " NOT") + " active.");
-			
+		try (Scanner scan = new Scanner(System.in)) {
+			while ( true )
+			{
+				System.out.print("Enter device id:");
+				if ( !scan.hasNextLong() )
+					break;
+				long id = scan.nextLong();
+				System.out.println("Device " + id + " is" + ((bm.isDeviceSet(id)) ? "" : " NOT") + " active.");
+				
+			}
 		}
-		
 		try {
 			bm.stop();
 		} catch (InterruptedException e) {

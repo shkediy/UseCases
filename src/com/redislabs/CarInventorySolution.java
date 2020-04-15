@@ -50,7 +50,6 @@ public class CarInventorySolution {
 			jedis.sadd("cars:brand:" + m.get("brand"), vin);
 			jedis.sadd("cars:state:" + m.get("state"), vin);
 			jedis.sadd("cars:year:" + m.get("year"), vin);
-			jedis.zadd("cars:years", Integer.parseInt(m.get("year")), "cars:year:" + m.get("year"));
 			jedis.zincrby("cars:brands", 1, m.get("brand"));
 		}
 	}
@@ -83,26 +82,6 @@ public class CarInventorySolution {
 		}
 	}
 	
-	public Set<String> getVinsForYearRange(int startYear, int endYear)
-	{
-		try ( Jedis jedis =  pool.getResource() ) {
-			Set<String> years = jedis.zrangeByScore("cars:years", startYear, endYear);
-			Set<String> vins = null;
-			boolean first = true;
-			for ( String year: years ) {
-				if ( first ) {
-					vins = jedis.smembers(year);
-					first = false;
-				}
-				else {
-				    vins.addAll(jedis.smembers(year));	
-				}	
-			}
-			
-			return vins;
-		}
-	}
-	
 	public Set<String> getVinsForBrandAndState(String brand, String state) {
 		try ( Jedis jedis =  pool.getResource() ) {
 			return jedis.sinter("cars:brand:" + brand, "cars:state:" + state);
@@ -125,8 +104,6 @@ public class CarInventorySolution {
 		
 		System.out.println("Total cars: " + test.getNumberOfCars());
 		System.out.println("Cars of 2013: " + test.getVinsForYear(2013));
-		System.out.println("Cars before 1995: " + test.getVinsForYearRange(0, 1995));
-		System.out.println("Cars between 2017 and 2019: " + test.getVinsForYearRange(2017, 2019));
 		System.out.println("Ford cars in Arizona: " + test.getVinsForBrandAndState("Ford", "AZ"));
 		System.out.println("Top 5 brands: " + test.getTopBrands(5));
 	}
