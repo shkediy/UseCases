@@ -65,8 +65,8 @@ public class PubSubList {
 		PubSubList test = new PubSubList("localhost", 6379);
 		
 		Consumer cons1 = test.new Consumer("1");
-		new Thread(cons1).start();
 		Consumer cons2 = test.new Consumer("2");
+		new Thread(cons1).start();
 		new Thread(cons2).start();
 		
 		int n = 10;

@@ -53,7 +53,7 @@ public class ProducerConsumerStreams {
 				List<Entry<String, List<StreamEntry>>> resp = jedis.xreadGroup(groupName, "cons:" + name, 1, 1000, false, new AbstractMap.SimpleEntry<String, StreamEntryID>(streamName, StreamEntryID.UNRECEIVED_ENTRY));
 				if ( resp != null ) {
 					for ( Entry<String, List<StreamEntry>> r : resp ) {
-						System.out.println(r.getKey() + " -- " + r.getValue().toString());
+						System.out.println("Consumer: " + name + " --> " + r.getKey() + " -- " + r.getValue().toString());
 						for ( StreamEntry e : r.getValue() ) {
 							jedis.xack(streamName, groupName, e.getID());
 						}
@@ -74,8 +74,8 @@ public class ProducerConsumerStreams {
 		ProducerConsumerStreams test = new ProducerConsumerStreams("localhost", 6379);
 		
 		Consumer cons1 = test.new Consumer("1");
-		new Thread(cons1).start();
 		Consumer cons2 = test.new Consumer("2");
+		new Thread(cons1).start();
 		new Thread(cons2).start();
 		
 		int n = 10;

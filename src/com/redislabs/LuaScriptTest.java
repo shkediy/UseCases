@@ -37,10 +37,11 @@ public class LuaScriptTest {
 		return (List<String>) jedis.evalsha(sha, 1, key, arg);
 	}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InterruptedException {
 		
 		LuaScriptTest test = new LuaScriptTest("localhost", 6379);
 		System.out.println(test.exec("test", Long.toString(System.currentTimeMillis())));
+		Thread.sleep(1000);
 		System.out.println(test.exec("test", Long.toString(System.currentTimeMillis())));
 	}
 }

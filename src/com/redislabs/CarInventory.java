@@ -75,12 +75,6 @@ public class CarInventory {
 		return null;
 	}
 	
-	public Set<String> getVinsForYearRange(int startYear, int endYear)
-	{
-		//TODO: Add missing code
-		return null;
-	}
-	
 	public Set<String> getVinsForBrandAndState(String brand, String state) {
 		//TODO: Add missing code
 		return null;
@@ -101,8 +95,6 @@ public class CarInventory {
 		
 		System.out.println("Total cars: " + test.getNumberOfCars());
 		System.out.println("Cars of 2013: " + test.getVinsForYear(2013));
-		System.out.println("Cars before 1990: " + test.getVinsForYearRange(0, 1990));
-		System.out.println("Cars between 2017 and 2019: " + test.getVinsForYearRange(2017, 2019));
 		System.out.println("Ford cars in Arizona: " + test.getVinsForBrandAndState("Ford", "AZ"));
 		System.out.println("Top 5 brands: " + test.getTopBrands(5));
 	}

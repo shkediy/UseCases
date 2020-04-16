@@ -66,18 +66,18 @@ public class MessageQueueTest {
 		
 		MessageReceiver mr = test.new MessageReceiver(new Jedis("localhost", 6379));
 		mr.start();
-		Scanner scan = new Scanner(System.in);
-		while ( true )
-		{
-			System.out.print("Enter message to send:");
-			if ( !scan.hasNext() )
-				break;
-			String message = scan.next();
-			if (message.equalsIgnoreCase("quit") || message.equalsIgnoreCase("exit"))
-				break;
-			test.writeMessage(message);
+		try (Scanner scan = new Scanner(System.in)) {
+			while ( true )
+			{
+				System.out.print("Enter message to send:");
+				if ( !scan.hasNext() )
+					break;
+				String message = scan.next();
+				if (message.equalsIgnoreCase("quit") || message.equalsIgnoreCase("exit"))
+					break;
+				test.writeMessage(message);
+			}
 		}
-		
 		mr.quit();
 
 	}
